@@ -1,8 +1,11 @@
 package com.example.demo.service;
 
+import com.example.demo.controller.dto.TeamCreateRequestDto;
 import com.example.demo.controller.dto.UserCreateRequestDto;
 import com.example.demo.controller.dto.UserResponseDto;
+import com.example.demo.repository.TeamRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.entity.Team;
 import com.example.demo.repository.entity.User;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +17,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
 
     @PostConstruct
     public void init() {
-        this.save(new UserCreateRequestDto("aaron", "123", "Aaron", 10, "DEVELOPER", "Backend"));
-        this.save(new UserCreateRequestDto("baron", "123", "Baron", 20, "DEVELOPER", "Frontend"));
-        this.save(new UserCreateRequestDto("caron", "123", "Caron", 30, "ENGINEER", "DevOps/SRE"));
+        // 팀 먼저 생성
+        Team backendTeam = teamRepository.save(Team.create("Backend Team"));
+        Team frontendTeam = teamRepository.save(Team.create("Frontend Team"));
+        Team devopsTeam = teamRepository.save(Team.create("DevOps/SRE Team"));
+
+        // 팀 id를 실제 생성된 값으로 넣기
+        this.save(new UserCreateRequestDto("aaron", "123", "Aaron", 10, "DEVELOPER", "Backend", backendTeam.getId()));
+        this.save(new UserCreateRequestDto("baron", "123", "Baron", 20, "DEVELOPER", "Frontend", frontendTeam.getId()));
+        this.save(new UserCreateRequestDto("caron", "123", "Caron", 30, "ENGINEER", "DevOps/SRE", devopsTeam.getId()));
     }
 
     public UserResponseDto findById(Integer id) {
@@ -43,13 +53,17 @@ public class UserService {
     }
 
     public UserResponseDto save(UserCreateRequestDto request) {
+        Team team = teamRepository.findById(request.getTeamId())
+                .orElseThrow(()-> new RuntimeException("팀이 존재하지 않습니다. teamId = " + request.getTeamId()));
+
         User user = User.create(
                 request.getUsername(),
                 request.getPassword(),
                 request.getName(),
                 request.getAge(),
                 request.getJob(),
-                request.getSpecialty()
+                request.getSpecialty(),
+                team
         );
         User created = userRepository.save(user);
         return UserResponseDto.from(created);

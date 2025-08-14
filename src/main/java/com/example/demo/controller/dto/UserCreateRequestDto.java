@@ -14,4 +14,5 @@ public class UserCreateRequestDto {
     private Integer age;
     private String job;
     private String specialty;
+    private Integer teamId;
 }

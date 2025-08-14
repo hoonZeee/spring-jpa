@@ -1,9 +1,6 @@
 package com.example.demo.repository.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -26,7 +23,11 @@ public class User {
     private String specialty;
     private LocalDateTime createdAt;
 
-    public static User create(String username, String password, String name, Integer age, String job, String specialty) {
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name ="team_id")
+    private Team team;
+
+    public static User create(String username, String password, String name, Integer age, String job, String specialty, Team team) {
         return new User(
                 null,
                 username,
@@ -35,7 +36,8 @@ public class User {
                 age,
                 job,
                 specialty,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                team
         );
     }
 }
