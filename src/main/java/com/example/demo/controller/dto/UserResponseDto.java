@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Getter
@@ -17,6 +19,7 @@ public class UserResponseDto {
     private String job;
     private String specialty;
     private Integer teamId;
+    private List<MessageResponseDto> messageList;
 
     public static UserResponseDto from(User entity) {
 
@@ -24,13 +27,20 @@ public class UserResponseDto {
                 .map(Team::getId)
                 .orElse(null);
 
+        List<MessageResponseDto> messages = Optional.ofNullable(entity.getMessages())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(MessageResponseDto::from)
+                .toList();
+
         return new UserResponseDto(
                 entity.getId(),
                 entity.getUsername(),
                 entity.getName(),
                 entity.getJob(),
                 entity.getSpecialty(),
-                teamId
+                teamId,
+                messages
         );
     }
 }

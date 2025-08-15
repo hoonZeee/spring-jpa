@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 @Getter
 @Entity
@@ -27,6 +29,9 @@ public class User {
     @JoinColumn(name ="team_id")
     private Team team;
 
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "createdBy")
+    private List<Message> messages;
+
     public static User create(String username, String password, String name, Integer age, String job, String specialty, Team team) {
         return new User(
                 null,
@@ -37,7 +42,8 @@ public class User {
                 job,
                 specialty,
                 LocalDateTime.now(),
-                team
+                team,
+                Collections.emptyList()
         );
     }
 }
